@@ -1,52 +1,74 @@
 # STAFFR
 
-This script retrieves the probability of a recessive allele and associated p-value from structural variant data.
+This tool is designed to analyze genetic data, specifically to retrieve the probability of recessive alleles and associated p-values from structural variants. It leverages the Hardy-Weinberg (HW) and non-Hardy-Weinberg (non-HW) models to perform its analyses. The tool also offers functionalities for visualization and p-value calculation.
 
 ## Installation
 
-Before running the script, ensure you have the required packages installed. You can use pip to install them as follows:
+Before running the script, ensure you have the required packages installed. 
+
+- Python 3.8.9
+- Pandas library
+- NumPy library
+- Matplotlib 
+- Scipy 
+
+You can use pip to install them as follows:
 ```sh
-pip install argparse pandas numpy json os
+pip install pandas numpy matplotlib scipy
 ```
 
 ## Usage
-Run the following command after downloading the necessary files
 
-- `cd run/tool/staffr`
+Below is the basic command format for running the tool:
 
-Consider the following options for running the script:
+- `python staffr.py input_file [-c CONVERGENCE] [-p] [-n] [-o VALUE] [-v [VISUALIZE]]`
 
-- `python staffr.py inputData [-viz] [-p] [-c] [-v] [-m] [-o]`
+### Arguments
 
-Where:
+- `input_file`: Path to the CSV file containing the data input. The file should have no header and contain data in a row. 
+- `-c`: Set the convergence tolerance for the Expectation-Maximization (EM) algorithm. Default is `1e-4`.
+- `-p`: Perform p-value calculation.
+- `-n`: Plot the null-model using the non-Hardy-Weinberg model.
+- `-v`: Visualize data and Hardy-Weinberg model.
 
-- `inputData`: The path to the file containing the input data
-- `-viz`: Shows plots, based on data provided
-- `-c [float]`: Defines convergence tolerance for EM
-- `-v`: Calculates p-value if used
-- `-m [.json file]`: Provides the theta file if analysis already ran
-- `-o`: Determines if there are outliers, given p-value
+### Examples
 
-For instance, if you want to run the script on a file named `example.csv` and visualize the resulting plot, you can run:
+1. Basic usage with input data for Hardy-Weinberg model analysis:
+   
+
+For instance, if you want to run the script on the synthetic data files provided, you can run:
 
 ```sh
-python staffr.py example.csv -viz
+python staffr.py data/synthetic_hw.csv
+```
+```sh
+python staffr.py data/synthetic_nonhw.csv
+```
+
+2. If you want to change the covergence tolerance so the model has a higher/lower threshold before parameter selection:
+
+```sh
+python staffr.py data/synthetic_hw.csv -c 1e-3
+```
+
+3. If you want to visualize the Hardy-Weinberg model with the data:
+
+```sh
+python staffr.py data/synthetic_hw.csv -v
+```
+
+4. If you want to calculate the p-value for the null model in which `q = 0`: 
+
+```sh
+python staffr.py data/synthetic_hw.csv -p
+```
+
+5. If you want to visualize the null model with the data: 
+
+```sh
+python staffr.py data/synthetic_hw.csv -n
 ```
 
 ## Output
 
-The output file will contain parameters named `pi`, `mu`, `sigma`, `q`, with the corresponding values for each parameter. The output file will be in JSON format, with the same name as the input file, followed by '_output'. The output parameters are calculated by the function `model_hw()` from the `model_hw` module.
-
-If '-v' is used during script execution, the output file will also include a `p_val` field containing the calculated p-value.
-
-## Plotting
-
-If the '-viz' flag is used, a plot is generated based on the `model_hw` function. If '-m' flag is used along with '-viz', the plots are generated based on values from the theta file provided.
-
-## Convergence Tolerance
-
-The `-c` flag followed by a float value helps to define the convergence tolerance for the Expectation-Maximization (EM) algorithm used in `model_hw()` function.
-
-## Outliers
-
-If '-o' flag is used, outlier detection is also performed in the data analysis.
+The tool generates a JSON file containing the results of the analysis, named after the input file with `_output.json` appended. For example, `synthetic_hw.csv` will generate an output file named `synthetic_hw_output.json`. This file includes estimated parameters such as `pi`, `mu`, `sigma`, `log-likelihood`, and `q`.
