@@ -63,7 +63,7 @@ def hw_model(X, c = 1e-4):
 
 def plot_hw_model(X, n, pi, mu, sigma):
     ax = plt.subplots(figsize = (6,6))[1]
-    plt.hist(X, alpha = 0.20, bins = max(X), color = 'grey', edgecolor = 'white', linewidth = 3)
+    plt.hist(X, alpha = 0.20, color = 'grey', edgecolor = 'white', linewidth = 3)
 
     curve2 = np.linspace(mu[0] - 10 * sigma[0], mu[0] + 10 * sigma[0], 1000)
     curve3 = np.linspace(mu[1] - 10 * sigma[1], mu[1] + 10 * sigma[1], 1000)
