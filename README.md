@@ -26,6 +26,7 @@ Below is the basic command format for running the tool:
 ### Arguments
 
 - `input_file`: Path to the CSV file containing the data input. The file should have no header and contain data in a row. 
+`-i`: Set the iteration limit for the Expectation-Maximization (EM) algorithm. Default is `10`. This is the default criteria of the tool. 
 - `-c`: Set the convergence tolerance for the Expectation-Maximization (EM) algorithm. Default is `1e-4`.
 - `-p`: Perform p-value calculation.
 - `-n`: Plot the null-model using the non-Hardy-Weinberg model.

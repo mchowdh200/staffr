@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from hw_model import hw_model, plot_hw_model
+from hw_model import hw_model_iter, hw_model_converge, plot_hw_model
 from nonhw_model import nonhw_model, plot_nonhw_model, ks_calc
 from pandas import read_csv
 import numpy as np
@@ -10,6 +10,7 @@ if __name__ == '__main__':
     parser = ArgumentParser(description='retrieve probability of recessive allele and associated p-value from structural variant')
     parser.add_argument('input', type=str, nargs='?', help='data input', default=None)
     parser.add_argument('-c', type=float, help='convergence tolerance for EM, default = 1e-4')
+    parser.add_argument('-i', type=float, help='iteration limit for EM, default = 10')
     parser.add_argument('-p', action='store_true', help='p-value calculation, requires theta, p-value')
     parser.add_argument('-n', action='store_true', help='plot null-model')
     parser.add_argument('-o', type=float, help='')
@@ -24,9 +25,12 @@ if __name__ == '__main__':
 
     if args.c is not None:
         c = args.c
-        theta_hw = list(hw_model(X, c))
-    else:
-        theta_hw = list(hw_model(X))
+        theta_hw = list(hw_model_converge(X, c))
+    elif args.i is not None:
+        iter = args.i
+        theta_hw = list(hw_model_iter(X, iter))
+    else: 
+        theta_hw = list(hw_model_iter(X))
 
     q = np.sqrt(theta_hw[0][2])
     theta_hw.append(q)

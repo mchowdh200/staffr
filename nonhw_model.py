@@ -41,8 +41,8 @@ def plot_nonhw_model(X, n, alpha, lambda_):
     plt.hist(X, alpha = 0.20, bins = max(X), color = 'grey', edgecolor = 'white', linewidth = 3) # plot histogram of input data set
 
     curve1 = np.linspace(1, 10 * lambda_, 1000)
-    plt.plot(curve1, n * expon.pdf(curve1, loc = 1, scale = lambda_) * (1-alpha), linewidth = 3, color = 'red')
-    plt.scatter(0, n * alpha, color = 'red')
+    plt.fill_between(curve1, n * expon.pdf(curve1, loc = 1, scale = lambda_) * (1-alpha), color = 'red', alpha = 0.5)
+    plt.scatter(0, n * alpha, color = 'green')
 
     ax.set_yscale("log") 
     ax.set_ylim(bottom=1)
