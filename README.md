@@ -25,8 +25,8 @@ Below is the basic command format for running the tool:
 
 ### Arguments
 
-- `input_file`: Path to the CSV file containing the data input. The file should have no header and contain data in a row. 
-`-i`: Set the iteration limit for the Expectation-Maximization (EM) algorithm. Default is `10`. This is the default criteria of the tool. 
+- `input_file`: Path to the CSV file containing the data input. The file should have no header and contain data in a row.
+- `-i`: Set the iteration limit for the Expectation-Maximization (EM) algorithm. Default is `10`. This is the default criteria of the tool. 
 - `-c`: Set the convergence tolerance for the Expectation-Maximization (EM) algorithm. Default is `1e-4`.
 - `-p`: Perform p-value calculation.
 - `-n`: Plot the null-model using the non-Hardy-Weinberg model.
@@ -52,19 +52,25 @@ python staffr.py data/synthetic_nonhw.csv
 python staffr.py data/synthetic_hw.csv -c 1e-3
 ```
 
-3. If you want to visualize the Hardy-Weinberg model with the data:
+3. If you want to change the iteration limit for before parameter selection:
+
+```sh
+python staffr.py data/synthetic_hw.csv -i 20
+```
+
+4. If you want to visualize the Hardy-Weinberg model with the data:
 
 ```sh
 python staffr.py data/synthetic_hw.csv -v
 ```
 
-4. If you want to calculate the p-value for the null model in which `q = 0`: 
+5. If you want to calculate the p-value for the null model in which `q = 0`: 
 
 ```sh
 python staffr.py data/synthetic_hw.csv -p
 ```
 
-5. If you want to visualize the null model with the data: 
+6. If you want to visualize the null model with the data: 
 
 ```sh
 python staffr.py data/synthetic_hw.csv -n
