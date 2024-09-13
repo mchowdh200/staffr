@@ -48,7 +48,20 @@ def parse_args():
         required=True,
         help="data column start (0-based)",
     )
+    parser.add_argument(
+        "--data-column-format",
+        type=str,
+        default="sample:count",
+        help="""Data column format. Expected to be a string with colon separated fields.
+        This program will expect one of the fields to be "count" and will use that field as the data.
+        """,
+    )
     return parser.parse_args()
+
+
+def parse_data_item(x: str, data_index: int) -> int:
+    return int(x.split(":")[data_index])
+    # count_index = fields.index("count")
 
 
 def fit_model(X: np.ndarray[Any, Any], c: float, p: bool) -> dict[str, Any]:
@@ -78,8 +91,13 @@ def main():
     pool = Pool(args.threads)
 
     data = pd.read_csv(args.input, sep="\t", header=None)
+    data_field_index = args.data_column_format.split(":").index("count")
     print(data.head())
-    X = data.iloc[:, args.data_column_start :].values
+    X = (
+        data.iloc[:, args.data_column_start :]
+        .applymap(partial(parse_data_item, data_index=data_field_index))
+        .values
+    )
     print(X.shape)
     exit()
 
