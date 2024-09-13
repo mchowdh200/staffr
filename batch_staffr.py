@@ -92,14 +92,11 @@ def main():
 
     data = pd.read_csv(args.input, sep="\t", header=None)
     data_field_index = args.data_column_format.split(":").index("count")
-    print(data.head())
     X = (
         data.iloc[:, args.data_column_start :]
         .applymap(partial(parse_data_item, data_index=data_field_index))
         .values
     )
-    print(X.shape)
-    exit()
 
     O = pool.map(partial(fit_model, c=args.convergence, p=args.p_value), X)
 
