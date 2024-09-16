@@ -128,19 +128,26 @@ def main():
     if args.p_value:
         result_keys.append("p-value")
 
-    header = "\t".join(map(str, data.columns[: args.data_column_start])) + "\t".join(
-        result_keys
+    header = (
+        "\t".join(map(str, data.columns[: args.data_column_start]))
+        + "\t"
+        + "\t".join(result_keys)
     )
     print(header)
 
     for (_, row), result in tqdm(
         zip(
             data.iterrows(),
-            pool.imap(partial(fit_model, iteration_limit=args.iteration_limit, p=args.p_value), X),
+            pool.imap(
+                partial(
+                    fit_model, iteration_limit=args.iteration_limit, p=args.p_value
+                ),
+                X,
+            ),
         ),
         total=len(X),
     ):
-    # for (_, row), x in tqdm(zip(data.iterrows(), X), total=len(X)):
+        # for (_, row), x in tqdm(zip(data.iterrows(), X), total=len(X)):
         # result = fit_model(x, args.iteration_limit, args.p_value)
         print("\t".join(map(str, row.iloc[: args.data_column_start])), end="\t")
         print("\t".join(str(result[k]) for k in result_keys))
