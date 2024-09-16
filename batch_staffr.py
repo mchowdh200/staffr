@@ -1,12 +1,19 @@
+import warnings
+
+from sklearn.exceptions import ConvergenceWarning
+
+warnings.filterwarnings("ignore", category=RuntimeWarning)
+warnings.filterwarnings("ignore", category=ConvergenceWarning)
 import argparse
 import os
 import sys
 from functools import partial
-from multiprocessing import Pool
+from multiprocessing import Pool, set_start_method
 from typing import Any
 
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 
 from hw_model import hw_model_converge, hw_model_iter
 from nonhw_model import ks_calc, nonhw_model
@@ -18,10 +25,14 @@ def parse_args():
     )
     parser.add_argument("input", type=str, nargs="?", help="data input", default=None)
     parser.add_argument(
+        "--iteration-limit",
+        default=1000,
+        help="iteration limit for EM",
+    )
+    parser.add_argument(
         "-c",
         "--convergence",
-        type=float,
-        default=1e-4,
+        default=None,
         help="convergence tolerance for EM",
     )
     parser.add_argument(
@@ -30,12 +41,12 @@ def parse_args():
         action="store_true",
         help="p-value calculation, requires theta, p-value",
     )
-    parser.add_argument(
-        "--output",
-        type=str,
-        help="output file",
-        required=True,
-    )
+    # parser.add_argument(
+    #     "--output",
+    #     type=str,
+    #     help="output file",
+    #     required=True,
+    # )
     parser.add_argument(
         "--threads",
         type=int,
@@ -64,8 +75,18 @@ def parse_data_item(x: str, data_index: int) -> int:
     # count_index = fields.index("count")
 
 
-def fit_model(X: np.ndarray[Any, Any], c: float, p: bool) -> dict[str, Any]:
-    theta_hw = list(hw_model_converge(X, c))
+def fit_model(
+    X: np.ndarray[Any, Any],
+    iteration_limit: int | None = None,
+    c: float | None = None,
+    p: bool = False,
+) -> dict[str, Any]:
+    if iteration_limit is not None:
+        theta_hw = list(hw_model_iter(X, iteration_limit))
+    elif c is not None:
+        theta_hw = list(hw_model_converge(X, c))
+    else:
+        theta_hw = list(hw_model_converge(X, 1e-4))
 
     q = np.sqrt(theta_hw[0][2])
     theta_hw.append(q)
@@ -86,6 +107,7 @@ def fit_model(X: np.ndarray[Any, Any], c: float, p: bool) -> dict[str, Any]:
 
 
 def main():
+    # set_start_method("spawn")
     np.set_printoptions(threshold=sys.maxsize)
     args = parse_args()
     pool = Pool(args.threads)
@@ -98,15 +120,30 @@ def main():
         .values
     )
 
-    O = pool.map(partial(fit_model, c=args.convergence, p=args.p_value), X)
+    # O = pool.map(
+    #     partial(fit_model, c=args.convergence, p=args.p_value),
+    #     X,
+    # )
+    result_keys = ["pi", "mu", "sigma", "log-likelihood", "q"]
+    if args.p_value:
+        result_keys.append("p-value")
 
-    output_data = pd.DataFrame(O)
-
-    # concatenate with original data minus the data columns
-    output_data = pd.concat(
-        [data.iloc[:, : args.data_column_start], output_data], axis=1
+    header = "\t".join(map(str, data.columns[: args.data_column_start])) + "\t".join(
+        result_keys
     )
-    output_data.to_csv(args.output, sep="\t", index=False, header=True)
+    print(header)
+
+    for (_, row), result in tqdm(
+        zip(
+            data.iterrows(),
+            pool.imap(partial(fit_model, iteration_limit=args.iteration_limit, p=args.p_value), X),
+        ),
+        total=len(X),
+    ):
+    # for (_, row), x in tqdm(zip(data.iterrows(), X), total=len(X)):
+        # result = fit_model(x, args.iteration_limit, args.p_value)
+        print("\t".join(map(str, row.iloc[: args.data_column_start])), end="\t")
+        print("\t".join(str(result[k]) for k in result_keys))
 
 
 if __name__ == "__main__":
